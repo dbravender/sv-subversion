@@ -175,7 +175,7 @@ class Branch(object):
             return self.trunk_url
         
         branches = [branch for branch in self.branches() if branch.split('.')[0] == branch_name]
-
+            
         def sort_merge_forwards(a, b):
             try:
                 a_version = int(a.split('.')[-1])
@@ -219,7 +219,9 @@ class Branch(object):
     @command
     def create(self, branch_name, parent=None):
         '''[branch_name] create a branch'''
-        if parent == None:
+        if self.branch == 'trunk':
+            parent_url = self.trunk_url
+        elif parent == None:
             parent_url = self.parent_url
         else:
             parent_url = self.latest_mergeforward_url(parent)
