@@ -4,6 +4,7 @@ from StringIO import StringIO
 from commands import getstatusoutput
 from pprint import pprint
 import sys, os
+from pdb import set_trace
 
 commands = {}
 

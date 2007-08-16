@@ -73,6 +73,7 @@ class TestBranch(object):
         self.branch.create('test_branch')
     
     def test_create_different_parent(self):
+        self.branch = Branch(svn_info=fixtures.info_merged_forward)
         self.branch._svn_log = fixtures.log_non_trunk_branch_parent
         self.branch._branches = ['jquery.1', 'jquery.2', 'jquery.3', 'some_other_branch', 'some_other_branch.1']
         self.branch.execute = mock_execute([['svn', 'cp', 'svn+ssh://dev/vol2/svn/monkey/branches/some_other_branch.1', 'svn+ssh://dev/vol2/svn/monkey/branches/test_branch', '-m', '"creating branch test_branch"']])
