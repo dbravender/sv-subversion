@@ -199,8 +199,9 @@ class Branch(object):
     
     @command
     def info(self):
-        '''display sv info'''
-        self.message('using repository layout:\n    trunk    = %s\n    branches = %s\n    tags     = %s\n current url = %s' % (self.trunk_url, self.branches_base_url, self.tags_base_url, self.url))
+        '''display svn info and sv's assumptions about the repository layout'''
+        self.execute(['svn', 'info'], verbose=True)
+        self.message('using repository layout:\n    trunk    = %s\n    branches = %s\n    tags     = %s\n' % (self.trunk_url, self.branches_base_url, self.tags_base_url))
     
     @command
     def branchdiff(self):
