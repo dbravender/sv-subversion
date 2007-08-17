@@ -4,7 +4,7 @@ from StringIO import StringIO
 from commands import getstatusoutput
 from pprint import pprint
 import sys, os
-from pdb import set_trace
+from optparse import OptionParser
 
 commands = {}
 
@@ -18,8 +18,8 @@ def command(func):
 def requires_clean_working_copy(func):
     def wrapper(*args, **kwargs):
         self = args[0]
-        if len(self.changed_files):
-            raise ModificationExcepion, 'Working copy has local modifications:\n   %s\nCommit or revert the changes' % '\n   '.join(self.changed_files)
+        if len(self.changed_files) and not self.ignore_modifications:
+            raise ModificationExcepion, 'Working copy has local modifications:\n   %s\nCommit, revert or ignore (-i) the changes' % '\n   '.join(self.changed_files)
         return func(*args, **kwargs)
     return wrapper
 
@@ -58,13 +58,14 @@ class Branch(object):
         tags_base_path = lambda branch: 'tags'
     )
     
-    def __init__(self, repository_layout=None, verbose=False, execute=None, svn_info=None):
+    def __init__(self, repository_layout=None, verbose=False, execute=None, svn_info=None, ignore_modifications=False):
         if execute:
             self.execute = execute
         self.verbose = verbose
         if svn_info:
             self._svn_info = svn_info
         
+        self.ignore_modifications = ignore_modifications
         self.root = self.svn_info.xpath('//root')[0].text
         self.url = self.svn_info.xpath('//url')[0].text
         self.revision = int(self.svn_info.xpath('//entry/@revision')[0])
@@ -237,7 +238,6 @@ class Branch(object):
         path = self.latest_mergeforward_url(branch_name)
         
         self.execute(['svn', 'switch', path], verbose=True)
-        self.execute(['svn', 'up'])
         self.revert()
     
     @requires_clean_working_copy
@@ -246,13 +246,13 @@ class Branch(object):
         '''[tag_name] switch to a tag'''
         
         self.execute(['svn', 'switch', '%s/%s' % (self.tags_base_url, tag_name)])
-        self.execute(['svn', 'up'])
         self.revert()
     
     @command
     def revert(self):
         '''svn revert -R .'''
-        self.execute(['svn', 'revert', '-R', '.'])
+        if not self.ignore_modifications:
+            self.execute(['svn', 'revert', '-R', '.'])
     
     def merge(self, branch_name, start_revision, end_revision):
         self.execute(['svn', 'merge', '-r%s:%s' % (start_revision, end_revision), '%s/%s' % (self.branches_base_url, branch_name)], verbose=True)
@@ -269,8 +269,7 @@ class Branch(object):
             pass
         
         self.execute(['svn', 'cp', self.url, tag_url, '-m', "'creating tag %s from %s'" % (tag_url, self.url)])
-            
-        
+    
     @requires_clean_working_copy
     @command
     def rebase(self, parent=None):
@@ -312,19 +311,25 @@ class Branch(object):
         return self.ls_diff(self.ls(before_path, before_revision), self.ls(after_path, after_revision))
     
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
+    parser = OptionParser()
+    parser.add_option("-i", "--ignore-modifications", dest="ignore_modifications", action="store_true",
+                      help="perform actions even when modifications are present in the working copy", default=False)
+
+    (options, args) = parser.parse_args()
+    if not len(args):
         for command, help in sorted(commands.iteritems()):
             print command.rjust(15), '-', help
-    elif sys.argv[1] == 'setup':
+        parser.print_help()
+    elif args[0] == 'setup':
         print 'export PATH="%s:$PATH"' % os.path.dirname(os.path.abspath(__file__))
     else:
-        branch = Branch()
+        branch = Branch(ignore_modifications=options.ignore_modifications)
         try:
-            if sys.argv[1] not in commands:
+            if args[0] not in commands:
                 branch.verbose = True
-                branch.execute(['svn'] + sys.argv[1:])
+                branch.execute(['svn'] + args[0:])
             else:
-                result = getattr(branch, sys.argv[1])(*sys.argv[2:])
+                result = getattr(branch, args[0])(*args[1:])
                 if result: 
                     pprint(result)
         except SVException, e:
