@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>sv</title>
+<!-- metadata -->
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20070913" />
+<meta name="author" content="Dan Bravender" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<script src="ui/default/slides.js" type="text/javascript"></script>
+<style>
+    .slide h1 {
+        text-transform: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header"></div>
+<div id="footer">
+<h1>sv</h1>
+<h2>September 13, 2007</h2>
+</div>
+
+</div>
+<div class="presentation">
+
+<div class="slide">
+<h1>sv: a very simple Subversion wrapper</h1>
+<h2>Rapid overview</h2>
+<h3>Dan Bravender</h3>
+</div>
+
+<div class="slide">
+<h1>Who to blame/praise for sv</h1>
+<ul>
+<li>Blame me, but praise Luke Opperman and Chad Slaughter, who wrote the scripts that sv imitates. They are probably better than sv will ever be, but they are stuck in a repository at our old job. I didn't want that to happen again, so I took a stab in my free-time.</li>
+</ul>
+<div class="handout">
+<li>At my last job we had some very useful subversion wrapper scripts for dealing with branches, but they were at my <i>last</i> job and I was getting really sick of typing:<li><code>svn merge -r3:HEAD https://sv-subversion.googlecode.com/ svn/branches/well_programmed_feature</code></li>
+<li><code>sv mergeback well_programmed_feature</code>.</li><br/></li>
+</div>
+</div>
+
+<div class="slide">
+<h1>Goals of sv</h1>
+<ul>
+<li>Make it easier to work with branches in Subversion<ul>
+    <li>Tries to make merging branches (not revisions!) a first-order operation</li>
+</ul></li>
+<li>Rebase (or merge forward) for good, clean branches that:<ul>
+    <li>Lessen the likelihood of conflicts</li>
+    <li>Help you with personal and public code reviews</li>
+</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Most useful commands</h1>
+<ul>
+<li><code>create</code> - creates a new branch</li>
+<li><code>branches</code> - list branches</li>
+<li><code>mergeback</code> - merge back to trunk by default (or any other arbitrary branch)</li>
+<li><code>switch</code> - switch to latest version of a branch</li>
+<li><code>branchdiff</code> - display a diff from --stop-on-copy to HEAD for the current branch</li>
+<li><code>rebase</code> - merge the branch onto a new copy of trunk or any other branch (thebranchname.mergecounter + 1)</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Repository Layout Assumptions</h1>
+<ul>
+<li>Single project repository - trunk, branches, tags</li>
+<li>Multiple project repository - project_name/trunk, project_name/branches, project_name/tags</li>
+<li>Exceptions can be coded in a configuration file</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>sv info</h1>  
+<pre style="font-size:75%">$ sv info
+sv: svn info --xml
+sv: current branch: presentation (https://sv-subversion.googlecode.com/svn/branches/presentation)
+sv: svn info
+Path: .
+URL: https://sv-subversion.googlecode.com/svn/branches/presentation
+Repository Root: https://sv-subversion.googlecode.com/svn
+Repository UUID: e8798b44-9c37-0410-97f0-e18aaa0e1eb9
+Revision: 32
+Node Kind: directory
+Schedule: normal
+Last Changed Author: dan.bravender
+Last Changed Rev: 30
+Last Changed Date: 2007-09-12 21:41:23 -0500 (Wed, 12 Sep 2007)
+
+sv: using repository layout:
+    trunk    = https://sv-subversion.googlecode.com/svn/trunk
+    branches = https://sv-subversion.googlecode.com/svn/branches
+    tags     = https://sv-subversion.googlecode.com/svn/tags
+$
+</pre>
+</div>
+
+<div class="slide">
+<h1>sv branches</h1>
+<pre style="font-size:75%">$ sv branches
+sv: svn info --xml
+sv: current branch: presentation (https://sv-subversion.googlecode.com/svn/branches/presentation)
+sv: svn ls --xml https://sv-subversion.googlecode.com/svn/branches
+['another_branch',
+ 'another_branch.1',
+ 'class_command',
+ 'dbmigration',
+ 'ignore_modifications',
+ 'presentation',
+ 'sample_branch',
+ 'sample_branch.1',
+ 'setuptools']
+</pre>
+</div>
+
+<div class="slide">
+<h1>sv rebase</h1>
+<ul>
+<li><code>sv rebase [trunk or another branch]</code>
+<br /><br />
+<img src="images/rebase.png" /></li>
+<li>Some tools help you do this, which I believe leads to dirty branches:
+<br /><br />
+<img src="images/pull_trunk.png" /></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>sv rebase</h1>
+<pre style="font-size:75%">$ sv rebase setuptools -i
+sv: svn info --xml
+sv: current branch: presentation (https://sv-subversion.googlecode.com/svn/branches/presentation)
+sv: svn status --xml
+sv: svn ls --xml https://sv-subversion.googlecode.com/svn/branches
+sv: svn cp https://sv-subversion.googlecode.com/svn/branches/setuptools 
+           https://sv-subversion.googlecode.com/svn/branches/presentation.1 
+           -m "creating branch presentation.1"
+sv: svn log -v --stop-on-copy --xml
+sv: svn ls --xml https://sv-subversion.googlecode.com/svn/branches
+sv: svn switch https://sv-subversion.googlecode.com/svn/branches/presentation.1
+D    presentation
+...
+Updated to revision 34.
+sv: svn merge -r27:HEAD https://sv-subversion.googlecode.com/svn/branches/presentation
+A    presentation
+...
+$
+</pre>
+</div>
+
+<div class="slide">
+<h1>sv switch</h1>
+<pre style="font-size:75%">$ sv switch presentation -i
+sv: svn info --xml
+sv: current branch: presentation.1 (https://sv-subversion.googlecode.com/svn/branches/presentation.1)
+sv: svn status --xml
+sv: svn ls --xml https://sv-subversion.googlecode.com/svn/branches
+sv: svn switch https://sv-subversion.googlecode.com/svn/branches/presentation.1
+At revision 35.
+</pre>
+</div>
+
+</div>
+
+</body>
+</html>
