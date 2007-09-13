@@ -1,7 +1,7 @@
 from sv import Branch
 import fixtures
 
-def dont_execute(cls, command):
+def dont_execute(cls, command, *args, **kwargs):
     raise Exception, 'Tried to execute %s' % command
 
 # we don't want the tests to _ever_ execute commands
@@ -42,9 +42,6 @@ class TestBranch(object):
     
     def test_message(self):
         self.branch.message('test')
-    
-    def test_verbose(self):
-        self.sv = Branch(svn_info=fixtures.info, verbose=True)
         
     def test_no_modifications(self):
         self.branch._svn_status = fixtures.status_clean
@@ -88,9 +85,9 @@ class TestBranch(object):
             [
                 ['svn', 'cp', 'svn+ssh://dev/vol2/svn/monkey/branches/some_other_branch.1', 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.3', '-m', '"creating branch jquery.3"'],
                 ['svn', 'switch', 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.3'],
-                ['svn', 'up'],
                 ['svn', 'revert', '-R', '.'],
-                ['svn', 'merge', '-r4:HEAD', 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.2']
+                ['svn', 'merge', '-r4:HEAD', 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.2'],
+                ['svn', 'up'],
             ])
 
         self.branch.rebase()

@@ -309,8 +309,8 @@ class Branch(object):
     @command
     def diff_files(self, before_path, before_revision, after_path, after_revision):
         return self.ls_diff(self.ls(before_path, before_revision), self.ls(after_path, after_revision))
-    
-if __name__ == '__main__':
+        
+def main():
     parser = OptionParser()
     parser.add_option("-i", "--ignore-modifications", dest="ignore_modifications", action="store_true",
                       help="perform actions even when modifications are present in the working copy", default=False)
@@ -334,3 +334,6 @@ if __name__ == '__main__':
                     pprint(result)
         except SVException, e:
             print 'Error:', str(e)
+    
+if __name__ == '__main__':
+    main()
