@@ -1,0 +1,20 @@
+0.2
+- added --force option to apply to different commands
+- issue23: the "R" action is now ignored when parsing out copyfrom-path entries
+- issue22: tag now warns if you are in a branch but it's not the latest (can be overidden with --force)
+- issue22: tag now warns if you specify a tag that already exists.  The old behavior was to remove the tag and continue (this is still possible with --force)
+- issue17: fixed piping/buffering issue while talking to the svn log --xml command (requires subprocess module now, stdlib >= 2.4)
+- issue4: any repository layout with trunk/branches/tags somewhere in the path is now supported
+- issue4: ~/.svconf is no longer recognized for declaring a repository layout (see above)
+- issue11: sv log now will traverse rebases (full log of branch history)
+- issue6: new commands up/update to detect and switch to latest rebase if applicable.
+- issue1: modification check no longer counts unversioned files as modified
+- issue8: creating a new branch will automatically switch to that branch. --no-switch option added for old behavior.
+- issue3: creating a new branch with an existing name now fails rather than creating a copy inside the existing branch.
+- issue3: createtag command added
+- issue7: command help is now displayed with --help
+- issue21: sv up in a trunk checkout now works.
+- issue26: parent_url determined by earliest copy-from even if other were files copied in.
+- issue27: create command with specified parent.
+- issue14: mergeback now shares parent selection code with create
+- issue25: help text cleaned up.
