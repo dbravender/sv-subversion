@@ -61,5 +61,5 @@ If you're not already here, the project lives at `Google Code`_
 .. _Google Code: http://code.google.com/p/sv-subversion/
 
 """
-__version__ = '0.2'
+__version__ = '0.3'
 from sv import *
