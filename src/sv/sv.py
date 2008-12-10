@@ -28,6 +28,9 @@ class _SmartSort(object):
     """namespace for natural sorting functions.
     
     use smart_sort() instead of using this directly
+    
+    based on code from: http://code.activestate.com/recipes/285264/
+    by Seo Sanghyeon and Connelly Barnes
     """
     _key_match = re.compile(r'(\d+|\D+)')
     
