@@ -267,8 +267,17 @@ class Branch(object):
             branch_name = self.branch
         branch_name, counter = get_branch_and_counter(branch_name)
         branches = [branch for branch in self.branches() if get_branch_and_counter(branch)[0] == branch_name]
+        def get_suffix_as_int(branch):
+            if branch.count('.'):
+                suf = branch.split('.')[-1]
+            else:
+                suf = None
+            if suf is not None and suf.isdigit():
+                return int(suf)
+            else:
+                return 0
         if do_sort:
-            branches.sort(key=lambda x: x.count('.') and x.split('.')[-1] or 0, reverse=True)
+            branches.sort(key=get_suffix_as_int, reverse=True)
         return branches
 
     def latest_mergeforward_url(self, branch_name):

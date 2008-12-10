@@ -150,6 +150,32 @@ class TestBranchCreateVariations(object):
             ['svn', 'cp', 'svn+ssh://dev/vol2/svn/monkey/branches/some_other_branch.1', 'svn+ssh://dev/vol2/svn/monkey/branches/test_branch', '-m', '"creating branch test_branch"']])
         self.branch.create('test_branch')
 
+class TestMergeForwardSorting(object):
+    
+    def setup(self):
+        branch = Branch(svn_info=fixtures.info)
+        self.branch = branch
+    
+    def test_mergeforward_gets_latest(self):
+        self.branch._branches = [['jquery.1', 'jquery.2', 'jquery.3']]
+        latest = self.branch.latest_mergeforward_url('jquery')
+        eq_(latest, 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.3')
+    
+    def test_mergeforward_gets_latest_after_10(self):
+        self.branch._branches = [['jquery.8', 'jquery.9', 'jquery.10', 'jquery.11']]
+        latest = self.branch.latest_mergeforward_url('jquery')
+        eq_(latest, 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.11')
+    
+    def test_mergeforward_handles_dots_and_nondigit_suffixes(self):
+        self.branch._branches = [['jquery.foob.8', 'jquery.foob.9', 'jquery.foob.10']]
+        latest = self.branch.latest_mergeforward_url('jquery.foob')
+        eq_(latest, 'svn+ssh://dev/vol2/svn/monkey/branches/jquery.foob.10')
+    
+    def test_mergeforward_handles_nondigit_suffixes(self):
+        self.branch._branches = [['jquery', 'foobar']]
+        latest = self.branch.latest_mergeforward_url('jquery')
+        eq_(latest, 'svn+ssh://dev/vol2/svn/monkey/branches/jquery')
+        
 
 class TestTag(object):
 
