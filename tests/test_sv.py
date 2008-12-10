@@ -1,4 +1,4 @@
-from sv import get_branch_and_counter, Branch, ReposLayout, SVException
+from sv import get_branch_and_counter, smart_sort, Branch, ReposLayout, SVException
 import fixtures
 import nose
 from nose.tools import eq_, raises
@@ -31,6 +31,10 @@ def test_get_branch_and_counter():
     eq_(get_branch_and_counter("foo.999"), ('foo', 999))
     eq_(get_branch_and_counter("foo.bazzo"), ('foo.bazzo', 0))
     eq_(get_branch_and_counter("foo.bazzo.1"), ('foo.bazzo', 1))
+
+def test_smart_sort():
+    eq_([i for i in smart_sort(['0.1.10', '0.1.9', 'foo', 'foo.17', 'foo.2'])],
+        ['0.1.9', '0.1.10', 'foo', 'foo.2', 'foo.17'])
 
 class TestBranch(BranchTest):    
     def test_info(self):

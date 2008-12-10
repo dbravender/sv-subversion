@@ -4,6 +4,7 @@
 see sv/__init__.py for documentation
 """
 
+import re
 from lxml import etree
 try:
     from cStringIO import StringIO
@@ -22,6 +23,41 @@ def requires_clean_working_copy(func):
             raise ModificationExcepion, 'Working copy has local modifications:\n   %s\nCommit, revert or ignore (-i) the changes' % '\n   '.join(self.changed_files)
         return func(*args, **kwargs)
     return wrapper
+
+class _SmartSort(object):
+    """namespace for natural sorting functions.
+    
+    use smart_sort() instead of using this directly
+    """
+    _key_match = re.compile(r'(\d+|\D+)')
+    
+    def try_int(self, s):
+        "Convert to integer if possible."
+        try: 
+            return int(s)
+        except: 
+            return s
+
+    def natsort_key(self, s):
+        "Used internally to get a tuple by which s is sorted."
+        seq = map(self.try_int, self._key_match.findall(s))
+        return seq
+
+    def natcmp(self, a, b):
+        "Natural string comparison, case sensitive."
+        return cmp(self.natsort_key(a), self.natsort_key(b))
+    
+    def natsorted(self, seq):
+        "Returns a copy of seq, sorted by natural string sort."
+        seq = [s for s in seq]
+        seq.sort(self.natcmp)
+        return seq
+
+def smart_sort(items):
+    """sorts a list where number suffixes ending in .1 come before .12, etc"""
+    s = _SmartSort()
+    return s.natsorted(items)
+    # return sorted(items)
 
 class SVException(Exception):
     pass
@@ -186,7 +222,7 @@ class Branch(object):
         if hasattr(self, '_tags'):
             return self._tags
         branches = etree.parse(StringIO(self.execute(['svn', 'ls', '--xml', self.tags_base_url])))
-        return branches.xpath('//name/text()')
+        return smart_sort(branches.xpath('//name/text()'))
     
     @property
     def changed_files(self):
