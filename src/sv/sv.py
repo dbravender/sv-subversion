@@ -24,10 +24,10 @@ def requires_clean_working_copy(func):
         return func(*args, **kwargs)
     return wrapper
 
-class _SmartSort(object):
+class NaturalSort(object):
     """namespace for natural sorting functions.
     
-    use smart_sort() instead of using this directly
+    use sorted_naturally() instead of using this directly
     
     based on code from: http://code.activestate.com/recipes/285264/
     by Seo Sanghyeon and Connelly Barnes
@@ -56,9 +56,9 @@ class _SmartSort(object):
         seq.sort(self.natcmp)
         return seq
 
-def smart_sort(items):
+def sorted_naturally(items):
     """sorts a list where number suffixes ending in .1 come before .12, etc"""
-    s = _SmartSort()
+    s = NaturalSort()
     return s.natsorted(items)
     # return sorted(items)
 
@@ -216,7 +216,7 @@ class Branch(object):
         if hasattr(self, '_branches'):
             return self._branches.pop(0)
         branches = etree.parse(StringIO(self.execute(['svn', 'ls', '--xml', self.branches_base_url])))
-        return branches.xpath('//name/text()')
+        return sorted_naturally(branches.xpath('//name/text()'))
     
     @command
     def tags(self):
@@ -225,7 +225,7 @@ class Branch(object):
         if hasattr(self, '_tags'):
             return self._tags
         branches = etree.parse(StringIO(self.execute(['svn', 'ls', '--xml', self.tags_base_url])))
-        return smart_sort(branches.xpath('//name/text()'))
+        return sorted_naturally(branches.xpath('//name/text()'))
     
     @property
     def changed_files(self):
