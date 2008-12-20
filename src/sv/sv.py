@@ -110,14 +110,15 @@ class ReposLayout(object):
                                         ", ".join(['"%s"' % d for d in self.tokens]), branch.path))
 
     def join_paths(self, *paths):
-        """join paths *always* with the `/' separator."""
-        # don't really feel like re-writing/testing os.path.join...
-        _saved_sep = os.path.sep
-        os.path.sep = "/"
-        try:
-            return os.path.join(*paths)
-        finally:
-            os.path.sep = _saved_sep
+        """join paths with the `/' separator to form a subversion URL."""
+        paths = [p for p in paths if p] # weed out None vals and empties
+        def trim_path(path):
+            if path[0]=='/':
+                path = path[1:]
+            if path[-1]=='/':
+                path = path[0:-1]
+            return path
+        return "/".join([trim_path(p) for p in paths])
     
     def trunk_path(self):
         return self.join_paths(self.base_path, 'trunk')

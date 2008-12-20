@@ -422,5 +422,13 @@ class TestReposLayout(object):
         class branch:
             path = "sweedish/tagz/rel_0_1_2/jorn/yander.taz"
 
-        self.repos = ReposLayout(branch)    
+        self.repos = ReposLayout(branch)
+    
+    def test_join_paths(self):
+        class branch:
+            path = "stub/trunk"
+
+        self.repos = ReposLayout(branch)
+        eq_(self.repos.join_paths("", "foo", "bar"), "foo/bar")
+        eq_(self.repos.join_paths("/foo/", "bar/"), "foo/bar")
 
